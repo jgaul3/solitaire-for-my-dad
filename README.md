@@ -1,2 +1,2 @@
-# solitaire_for_my_dad
-The game spider solitaire as a PWA for my dad
+# Solitaire for my dad
+Spider solitaire for my dad, provided as a PWA for offline operation.
