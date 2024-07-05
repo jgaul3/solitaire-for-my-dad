@@ -1,0 +1,17 @@
+{
+  "name": "Solitaire for my Dad",
+  "short_name": "Dad's Solitaire",
+  "description": "Spider solitaire for my dad",
+  "scope": "/solitaire-for-my-dad/",
+  "start_url": "/solitaire-for-my-dad/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone", 
+  "icons": [
+      {
+        "src": "/solitaire-for-my-dad/img/icon.png",
+        "type": "image/png",
+        "sizes": "700x700"
+      }
+  ]
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub page as PWA template</title>
+  <link rel="canonical" href="https://jgaul3.github.io/solitaire-for-my-dad/" />
+  <link rel="manifest" href="/solitaire-for-my-dad/manifest.webmanifest">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+ 
+  <h1>Test</h1>
+
+  <script>
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.register (
+          '/solitaire-for-my-dad/sw.js',
+          {scope: '/solitaire-for-my-dad/'}
+        )
+      }
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>
