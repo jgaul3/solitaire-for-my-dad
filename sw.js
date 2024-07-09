@@ -1,6 +1,6 @@
 var GHPATH = '/solitaire-for-my-dad';
-var APP_PREFIX = 'gppwa_';
-var VERSION = 'version_002';
+var APP_PREFIX = 'sfmd_';
+var VERSION = '1';
 var URLS = [    
   `${GHPATH}/`,
   `${GHPATH}/index.html`,
