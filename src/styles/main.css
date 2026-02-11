@@ -12,7 +12,6 @@
   --card-width: 60px;
   --card-height: 84px;
   --card-radius: 6px;
-  --header-height: 44px;
   --column-gap: 4px;
   --card-overlap: 20px;
   --selected-glow: rgba(255, 215, 0, 0.8);
@@ -66,14 +65,34 @@ body.modal-open .modal-overlay {
 /* ===== Header ===== */
 .header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: var(--header-height);
-  padding: 0 8px;
+  flex-direction: column;
   background: var(--felt-dark);
   flex-shrink: 0;
-  gap: 4px;
   z-index: 10;
+}
+
+.header__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  gap: 4px;
+}
+
+.header__row--stats {
+  gap: 12px;
+  font-size: 15px;
+  opacity: 0.9;
+  padding: 4px 8px 2px;
+}
+
+.header__row--actions {
+  padding: 2px 8px 4px;
+  justify-content: center;
+}
+
+.header__stat {
+  white-space: nowrap;
 }
 
 .header__btn {
@@ -92,31 +111,36 @@ body.modal-open .modal-overlay {
   background: var(--btn-hover);
 }
 
-.header__btn--icon {
-  font-size: 22px;
-  padding: 4px 8px;
-}
-
-.header__stats {
-  display: flex;
-  gap: 12px;
-  font-size: 15px;
-  opacity: 0.9;
-}
-
-.header__stat {
-  white-space: nowrap;
-}
-
-.header__right {
-  display: flex;
-  gap: 4px;
-  align-items: center;
+.header__btn--struck {
+  text-decoration: line-through;
+  opacity: 0.5;
 }
 
 .header__deal-count {
   opacity: 0.7;
   font-size: 0.85em;
+}
+
+/* Wide screens: single-row header */
+@media (min-width: 600px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+  }
+
+  .header__row {
+    padding: 0;
+  }
+
+  .header__row--stats {
+    padding: 0;
+  }
+
+  .header__row--actions {
+    padding: 0;
+  }
 }
 
 /* ===== Main ===== */
@@ -132,7 +156,7 @@ body.modal-open .modal-overlay {
 /* ===== Tableau ===== */
 .tableau {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, calc(var(--card-height) * 4 / 5)));
+  grid-template-columns: repeat(10, minmax(0, calc(var(--card-height) * 4/5)));
   justify-content: center;
   gap: var(--column-gap);
   flex: 1;
@@ -176,37 +200,7 @@ body.modal-open .modal-overlay {
   font-family: var(--font);
 }
 
-/* Position cards with overlap */
-.column > .card {
-  top: calc(var(--child-index, 0) * var(--card-overlap, 20px));
-}
-
-/* Set child index via nth-child — JS will also set --card-overlap on the column */
-.column > .card:nth-child(1) { --child-index: 0; }
-.column > .card:nth-child(2) { --child-index: 1; }
-.column > .card:nth-child(3) { --child-index: 2; }
-.column > .card:nth-child(4) { --child-index: 3; }
-.column > .card:nth-child(5) { --child-index: 4; }
-.column > .card:nth-child(6) { --child-index: 5; }
-.column > .card:nth-child(7) { --child-index: 6; }
-.column > .card:nth-child(8) { --child-index: 7; }
-.column > .card:nth-child(9) { --child-index: 8; }
-.column > .card:nth-child(10) { --child-index: 9; }
-.column > .card:nth-child(11) { --child-index: 10; }
-.column > .card:nth-child(12) { --child-index: 11; }
-.column > .card:nth-child(13) { --child-index: 12; }
-.column > .card:nth-child(14) { --child-index: 13; }
-.column > .card:nth-child(15) { --child-index: 14; }
-.column > .card:nth-child(16) { --child-index: 15; }
-.column > .card:nth-child(17) { --child-index: 16; }
-.column > .card:nth-child(18) { --child-index: 17; }
-.column > .card:nth-child(19) { --child-index: 18; }
-.column > .card:nth-child(20) { --child-index: 19; }
-.column > .card:nth-child(21) { --child-index: 20; }
-.column > .card:nth-child(22) { --child-index: 21; }
-.column > .card:nth-child(23) { --child-index: 22; }
-.column > .card:nth-child(24) { --child-index: 23; }
-.column > .card:nth-child(25) { --child-index: 24; }
+/* Card positions are set via inline styles in JS (recalcOverlap) */
 
 /* Face up card */
 .card--black,
@@ -216,6 +210,10 @@ body.modal-open .modal-overlay {
 
 .card--black { color: var(--card-black); }
 .card--red { color: var(--card-red); }
+
+.card--locked {
+  background: #dddddd;
+}
 
 /* Face down card */
 .card--facedown {
@@ -239,7 +237,7 @@ body.modal-open .modal-overlay {
 /* Top corner — always visible */
 .card__corner {
   position: absolute;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1;
   font-weight: 700;
   white-space: nowrap;
@@ -247,7 +245,7 @@ body.modal-open .modal-overlay {
 
 .card__corner--top {
   top: 3px;
-  left: 4px;
+  left: 3px;
 }
 
 /* Full layout (landscape): center suit + bottom corner */
@@ -258,9 +256,9 @@ body.modal-open .modal-overlay {
 .card__corner--bottom {
   position: absolute;
   bottom: 3px;
-  right: 4px;
+  right: 3px;
   transform: rotate(180deg);
-  font-size: 13px;
+  font-size: 18px;
   line-height: 1;
   font-weight: 700;
   white-space: nowrap;
@@ -327,8 +325,12 @@ body.modal-open .modal-overlay {
   border-radius: 12px;
   padding: 24px;
   max-width: 400px;
+  max-height: 90dvh;
   width: 100%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal__title {
@@ -341,6 +343,7 @@ body.modal-open .modal-overlay {
   font-size: 16px;
   line-height: 1.5;
   margin-bottom: 20px;
+  overflow-y: auto;
 }
 
 .modal__body p {
@@ -445,16 +448,21 @@ body.modal-open .modal-overlay {
 
 /* ===== Responsive sizing ===== */
 
+/* Narrow screens */
+@media (max-width: 500px) {
+  :root {
+    --card-height: 68px;
+  }
+}
+
 /* Small phones */
 @media (max-width: 400px) {
   :root {
-    --card-height: 70px;
-    --card-width: 50px;
-    --header-height: 40px;
+    --card-height: 56px;
   }
 
   .header__btn { font-size: 13px; padding: 3px 6px; }
-  .header__stats { gap: 6px; font-size: 13px; }
+  .header__row--stats { gap: 6px; font-size: 13px; }
 }
 
 /* Tablets / larger screens */

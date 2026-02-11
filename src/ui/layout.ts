@@ -2,7 +2,7 @@ import { recalcOverlap } from './tableau-renderer';
 
 export type Orientation = 'portrait' | 'landscape';
 
-let currentOrientation: Orientation = 'portrait';
+let currentOrientation: Orientation | null = null;
 let onOrientationChange: ((o: Orientation) => void) | null = null;
 
 export function initLayout(callback: (o: Orientation) => void): void {
@@ -29,5 +29,5 @@ function updateOrientation(): void {
 }
 
 export function getOrientation(): Orientation {
-  return currentOrientation;
+  return currentOrientation ?? 'portrait';
 }

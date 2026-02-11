@@ -7,9 +7,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Spider Solitaire',
+        name: 'Solitaire for my dad',
         short_name: 'Spider',
-        description: 'Spider Solitaire card game',
+        description: 'The game Spider Solitaire for my dad',
         theme_color: '#1a5c2a',
         background_color: '#1a5c2a',
         display: 'standalone',

@@ -43,11 +43,13 @@ export class App {
     }
 
     renderFullState(this.state, this.els);
+    this.updateHeaderMode();
 
     this.bindEvents(appEl);
     initLayout(() => recalcOverlap());
 
-    if (!this.state.won) {
+    // Only start timer if game is already in progress (restored from save)
+    if (!this.state.won && this.state.moves > 0) {
       this.startTimer();
     }
     this.updateTimerDisplay();
@@ -72,11 +74,15 @@ export class App {
         return;
       }
 
-      // Check for empty column click
+      // Check for column click (empty column, or highlighted valid target)
       const colEl = target.closest('.column') as HTMLElement | null;
-      if (colEl && colEl.classList.contains('column--empty') && colEl.dataset.col !== undefined) {
-        this.handleColumnClick(parseInt(colEl.dataset.col));
-        return;
+      if (colEl && colEl.dataset.col !== undefined) {
+        const isEmpty = colEl.classList.contains('column--empty');
+        const isHighlighted = colEl.classList.contains('column--highlight');
+        if (isEmpty || (isHighlighted && this.selection)) {
+          this.handleColumnClick(parseInt(colEl.dataset.col));
+          return;
+        }
       }
 
       // Click on empty space deselects
@@ -89,7 +95,7 @@ export class App {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         this.pauseTimer();
-      } else if (!this.state.won) {
+      } else if (!this.state.won && this.state.moves > 0) {
         this.startTimer();
       }
     });
@@ -171,11 +177,16 @@ export class App {
   }
 
   private tryMove(fromCol: number, startIndex: number, toCol: number): void {
+    const wasPreGame = this.state.moves === 0;
     const result = moveCards(this.state, fromCol, startIndex, toCol);
 
     this.deselect();
 
     if (result.success) {
+      if (wasPreGame) {
+        this.startTimer();
+        this.updateHeaderMode();
+      }
       renderPartial(this.state, result.changedCols, this.els);
       this.save();
 
@@ -195,9 +206,14 @@ export class App {
       return;
     }
 
+    const wasPreGame = this.state.moves === 0;
     this.deselect();
     const result = dealStock(this.state);
     if (result.success) {
+      if (wasPreGame) {
+        this.startTimer();
+        this.updateHeaderMode();
+      }
       renderPartial(this.state, result.changedCols, this.els);
       this.save();
 
@@ -221,17 +237,22 @@ export class App {
     if (result.success) {
       this.state.won = false;
       renderFullState(this.state, this.els);
+      this.updateHeaderMode();
       this.save();
-      if (!this.timerRunning) {
+      if (!this.timerRunning && this.state.moves > 0) {
         this.startTimer();
       }
     }
   }
 
   private confirmNewGame(): void {
+    if (this.state.moves === 0) {
+      // Pre-game: no confirmation needed
+      this.startNewGame(this.state.difficulty);
+      return;
+    }
     showConfirm('Start a new game? Current progress will be lost.', () => {
-      // Record loss if game was in progress
-      if (!this.state.won && this.state.moves > 0) {
+      if (!this.state.won) {
         recordLoss(this.state.difficulty);
       }
       this.startNewGame(this.state.difficulty);
@@ -245,7 +266,8 @@ export class App {
     saveDifficulty(difficulty);
     this.deselect();
     renderFullState(this.state, this.els);
-    this.startTimer();
+    this.updateTimerDisplay();
+    this.updateHeaderMode();
     this.save();
   }
 
@@ -294,7 +316,10 @@ export class App {
     const currentDifficulty = this.state.difficulty;
     const stats = loadStats();
 
+    const inGame = this.state.moves > 0;
+
     const body = `
+      ${inGame ? '<button class="modal__btn modal__btn--primary" data-action="new-game-settings" style="width:100%;margin-bottom:16px">New Game</button>' : ''}
       <h3 style="margin-bottom:8px">Difficulty</h3>
       <div class="difficulty-options">
         <label>
@@ -341,17 +366,19 @@ export class App {
         case 'close-settings':
           closeModal();
           break;
+        case 'new-game-settings':
+          closeModal();
+          this.confirmNewGame();
+          break;
         case 'apply-settings': {
           const radio = overlay.querySelector('input[name="difficulty"]:checked') as HTMLInputElement;
           if (radio) {
             const newDifficulty = radio.value as Difficulty;
-            if (newDifficulty !== this.state.difficulty || true) {
-              closeModal();
-              if (!this.state.won && this.state.moves > 0) {
-                recordLoss(this.state.difficulty);
-              }
-              this.startNewGame(newDifficulty);
+            closeModal();
+            if (!this.state.won && this.state.moves > 0) {
+              recordLoss(this.state.difficulty);
             }
+            this.startNewGame(newDifficulty);
           }
           break;
         }
@@ -378,6 +405,11 @@ export class App {
         }
       }
     });
+  }
+
+  private updateHeaderMode(): void {
+    const preGame = this.state.moves === 0;
+    this.els.header.newGameBtn.style.display = preGame ? '' : 'none';
   }
 
   // === Timer ===

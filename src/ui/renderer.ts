@@ -1,4 +1,5 @@
 import { GameState } from '../types';
+import { canDeal } from '../game/rules';
 import { initHeader, HeaderElements, updateTimer, updateMoves, updateSuits, updateDealCount } from './header-renderer';
 import { initTableau, renderColumns } from './tableau-renderer';
 
@@ -35,6 +36,7 @@ function updateStats(state: GameState, els: RendererElements): void {
   updateMoves(els.header.movesEl, state.moves);
   updateSuits(els.header.suitsEl, state.completedSuits);
   updateDealCount(els.header.dealCountEl, state.stock.length);
+  els.header.dealBtn.classList.toggle('header__btn--struck', !canDeal(state) && state.stock.length > 0);
 }
 
 export { updateTimer };

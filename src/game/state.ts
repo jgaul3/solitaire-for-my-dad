@@ -175,7 +175,10 @@ export function undoLastAction(state: GameState): { success: boolean; changedCol
     undoSingleAction(state, action, changedCols);
   }
 
-  state.moves++;
+  // Decrement moves (the original action added one; undo reverses it)
+  if (state.moves > 0) {
+    state.moves--;
+  }
 
   return { success: true, changedCols: Array.from(changedCols) };
 }

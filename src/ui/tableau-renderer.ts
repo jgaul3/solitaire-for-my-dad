@@ -1,6 +1,7 @@
 import { GameState } from '../types';
 import { TABLEAU_COLS } from '../constants';
 import { createCardElement } from './card-renderer';
+import { canPickUp } from '../game/rules';
 
 let tableauEl: HTMLElement | null = null;
 const columnEls: HTMLElement[] = [];
@@ -46,6 +47,9 @@ function renderColumn(state: GameState, colIdx: number): void {
 
   for (let i = 0; i < cards.length; i++) {
     const cardEl = createCardElement(cards[i], colIdx, i);
+    if (cards[i].faceUp && !canPickUp(state, colIdx, i)) {
+      cardEl.classList.add('card--locked');
+    }
     colEl.appendChild(cardEl);
   }
 }
@@ -63,19 +67,33 @@ export function recalcOverlap(): void {
 
   for (let i = 0; i < TABLEAU_COLS; i++) {
     const colEl = columnEls[i];
-    const cardCount = colEl.children.length;
-    if (cardCount <= 1) {
-      colEl.style.setProperty('--card-overlap', '20px');
+    const cards = Array.from(colEl.children) as HTMLElement[];
+    if (cards.length <= 1) {
+      if (cards.length === 1) cards[0].style.top = '0px';
       continue;
     }
 
-    // We need: (cardCount - 1) * overlap + cardHeight <= availableHeight
-    const maxOverlap = 28; // px, comfortable default
-    const minOverlap = 10; // px, minimum readability
-    let overlap = Math.min(maxOverlap, (availableHeight - cardHeight) / (cardCount - 1));
-    overlap = Math.max(minOverlap, Math.floor(overlap));
+    // Count face-down and face-up cards (excluding the last card which sits on top)
+    // Each face-down gap counts as 0.5 units, each face-up gap counts as 1 unit
+    let totalUnits = 0;
+    for (let j = 0; j < cards.length - 1; j++) {
+      totalUnits += cards[j].classList.contains('card--facedown') ? 0.5 : 1;
+    }
 
-    colEl.style.setProperty('--card-overlap', `${overlap}px`);
+    const maxOverlap = 28;
+    const minOverlap = 10;
+    let faceUpOverlap = Math.min(maxOverlap, (availableHeight - cardHeight) / totalUnits);
+    faceUpOverlap = Math.max(minOverlap, Math.floor(faceUpOverlap));
+
+    let top = 0;
+    for (let j = 0; j < cards.length; j++) {
+      cards[j].style.top = `${top}px`;
+      if (j < cards.length - 1) {
+        top += cards[j].classList.contains('card--facedown')
+          ? Math.floor(faceUpOverlap / 2)
+          : faceUpOverlap;
+      }
+    }
   }
 }
 

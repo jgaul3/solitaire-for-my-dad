@@ -21,6 +21,11 @@ export function showModal(title: string, bodyHtml: string, buttons: { label: str
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
 
+  // Click on overlay (outside modal) closes it
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
   // Prevent background scroll
   document.body.classList.add('modal-open');
 

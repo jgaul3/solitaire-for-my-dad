@@ -3,6 +3,7 @@ export interface HeaderElements {
   movesEl: HTMLElement;
   suitsEl: HTMLElement;
   dealCountEl: HTMLElement;
+  dealBtn: HTMLElement;
   newGameBtn: HTMLElement;
   settingsBtn: HTMLElement;
 }
@@ -13,16 +14,16 @@ export function initHeader(container: HTMLElement): HeaderElements {
   header.className = 'header';
 
   header.innerHTML = `
-    <button class="header__btn" data-action="new-game">New Game</button>
-    <div class="header__stats">
-      <span class="header__stat" data-stat="suits">🂠 0/8</span>
+    <div class="header__row header__row--stats">
+      <span class="header__stat" data-stat="suits">♠ 0/8</span>
       <span class="header__stat" data-stat="moves">Moves: 0</span>
       <span class="header__stat" data-stat="timer">0:00</span>
     </div>
-    <div class="header__right">
+    <div class="header__row header__row--actions">
+      <button class="header__btn" data-action="new-game">New Game</button>
       <button class="header__btn" data-action="deal">Deal <span class="header__deal-count" data-deal-count>(5)</span></button>
       <button class="header__btn" data-action="undo">Undo</button>
-      <button class="header__btn header__btn--icon" data-action="settings">⚙</button>
+      <button class="header__btn" data-action="settings">Settings</button>
     </div>
   `;
 
@@ -33,6 +34,7 @@ export function initHeader(container: HTMLElement): HeaderElements {
     movesEl: header.querySelector('[data-stat="moves"]')!,
     suitsEl: header.querySelector('[data-stat="suits"]')!,
     dealCountEl: header.querySelector('[data-deal-count]')!,
+    dealBtn: header.querySelector('[data-action="deal"]')!,
     newGameBtn: header.querySelector('[data-action="new-game"]')!,
     settingsBtn: header.querySelector('[data-action="settings"]')!,
   };
