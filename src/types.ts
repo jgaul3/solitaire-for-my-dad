@@ -19,6 +19,7 @@ export interface GameState {
   difficulty: Difficulty;
   undoStack: UndoAction[];
   won: boolean;
+  started: boolean; // true once first move is made, never reverts via undo
 }
 
 export interface UndoAction {

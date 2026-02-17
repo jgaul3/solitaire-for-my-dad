@@ -196,7 +196,6 @@ body.modal-open .modal-overlay {
   border-radius: var(--card-radius);
   border: 1px solid var(--card-border);
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
   font-family: var(--font);
 }
 
@@ -304,7 +303,6 @@ body.modal-open .modal-overlay {
 .card--selected {
   box-shadow: 0 0 0 3px var(--selected-glow);
   z-index: 100;
-  transform: translateX(2px);
 }
 
 /* ===== Modal ===== */

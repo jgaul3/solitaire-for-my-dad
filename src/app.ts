@@ -49,7 +49,7 @@ export class App {
     initLayout(() => recalcOverlap());
 
     // Only start timer if game is already in progress (restored from save)
-    if (!this.state.won && this.state.moves > 0) {
+    if (!this.state.won && this.state.started) {
       this.startTimer();
     }
     this.updateTimerDisplay();
@@ -95,7 +95,7 @@ export class App {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         this.pauseTimer();
-      } else if (!this.state.won && this.state.moves > 0) {
+      } else if (!this.state.won && this.state.started) {
         this.startTimer();
       }
     });
@@ -140,8 +140,14 @@ export class App {
         return;
       }
 
-      // Try to move to this column
-      this.tryMove(this.selection.col, this.selection.startIndex, col);
+      // Try to move to this column; if it fails, select the clicked card instead
+      if (!this.tryMove(this.selection.col, this.selection.startIndex, col)) {
+        if (canPickUp(this.state, col, cardIndex)) {
+          this.select(col, cardIndex);
+        } else {
+          this.deselect();
+        }
+      }
     } else {
       // No selection — try to select this card
       if (canPickUp(this.state, col, cardIndex)) {
@@ -176,24 +182,26 @@ export class App {
     clearHighlights();
   }
 
-  private tryMove(fromCol: number, startIndex: number, toCol: number): void {
-    const wasPreGame = this.state.moves === 0;
+  private tryMove(fromCol: number, startIndex: number, toCol: number): boolean {
+    const wasPreGame = !this.state.started;
     const result = moveCards(this.state, fromCol, startIndex, toCol);
+
+    if (!result.success) return false;
 
     this.deselect();
 
-    if (result.success) {
-      if (wasPreGame) {
-        this.startTimer();
-        this.updateHeaderMode();
-      }
-      renderPartial(this.state, result.changedCols, this.els);
-      this.save();
-
-      if (isWon(this.state)) {
-        this.handleWin();
-      }
+    if (wasPreGame) {
+      this.state.started = true;
+      this.startTimer();
+      this.updateHeaderMode();
     }
+    renderPartial(this.state, result.changedCols, this.els);
+    this.save();
+
+    if (isWon(this.state)) {
+      this.handleWin();
+    }
+    return true;
   }
 
   private doDeal(): void {
@@ -206,11 +214,12 @@ export class App {
       return;
     }
 
-    const wasPreGame = this.state.moves === 0;
+    const wasPreGame = !this.state.started;
     this.deselect();
     const result = dealStock(this.state);
     if (result.success) {
       if (wasPreGame) {
+        this.state.started = true;
         this.startTimer();
         this.updateHeaderMode();
       }
@@ -239,14 +248,14 @@ export class App {
       renderFullState(this.state, this.els);
       this.updateHeaderMode();
       this.save();
-      if (!this.timerRunning && this.state.moves > 0) {
+      if (!this.timerRunning && this.state.started) {
         this.startTimer();
       }
     }
   }
 
   private confirmNewGame(): void {
-    if (this.state.moves === 0) {
+    if (!this.state.started) {
       // Pre-game: no confirmation needed
       this.startNewGame(this.state.difficulty);
       return;
@@ -316,7 +325,7 @@ export class App {
     const currentDifficulty = this.state.difficulty;
     const stats = loadStats();
 
-    const inGame = this.state.moves > 0;
+    const inGame = this.state.started;
 
     const body = `
       ${inGame ? '<button class="modal__btn modal__btn--primary" data-action="new-game-settings" style="width:100%;margin-bottom:16px">New Game</button>' : ''}
@@ -375,7 +384,7 @@ export class App {
           if (radio) {
             const newDifficulty = radio.value as Difficulty;
             closeModal();
-            if (!this.state.won && this.state.moves > 0) {
+            if (!this.state.won && this.state.started) {
               recordLoss(this.state.difficulty);
             }
             this.startNewGame(newDifficulty);
@@ -408,7 +417,7 @@ export class App {
   }
 
   private updateHeaderMode(): void {
-    const preGame = this.state.moves === 0;
+    const preGame = !this.state.started;
     this.els.header.newGameBtn.style.display = preGame ? '' : 'none';
   }
 

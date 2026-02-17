@@ -20,6 +20,7 @@ export function createNewGame(difficulty: Difficulty): GameState {
     difficulty,
     undoStack: [],
     won: false,
+    started: false,
   };
 }
 
